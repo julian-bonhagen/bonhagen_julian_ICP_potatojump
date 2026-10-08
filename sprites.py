@@ -40,6 +40,7 @@ class Player(Sprite):
         self.groups = game.all_sprites
         Sprite.__init__(self, self.groups)
         self.game = game
+        #this provides us with raster images for use in animation or otherwise
         self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image = self.spritesheet.get_image(0, 0, TILESIZE, TILESIZE)
@@ -49,9 +50,10 @@ class Player(Sprite):
         self.hit_rect = PLAYER_HIT_RECT
         self.vel = vec (0,0)
         self.pos = vec(x, y) * TILESIZE
-
+        #start with current frames and last update at zero so we can cycle through animations
         self.current_frame = 0
         self.last_update = 0
+        #accounting for the states of the player
         self.jumping = False
         self.moving = False
         self.load_images()
@@ -111,6 +113,7 @@ class Player(Sprite):
 
     def update(self):
         self.get_keys()
+        self.animate()
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
 
