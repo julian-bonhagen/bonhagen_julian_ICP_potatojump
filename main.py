@@ -30,18 +30,41 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
         self.playing = True
+        self.score = 0
+        self.highscore = 0
 
     def load_data(self, map):
         self.game_dir = path.dirname(__file__)
         #^^ game directory, uses path module from os 
+        self.game_save_file = path.join(self.game_dir, "highscore.txt")
         self.img_dir = path.join(self.game_dir, 'images')
         self.snd_dir = path.join(self.game_dir, 'sounds')
         self.map = Map(path.join(self.game_dir, map))
+
+        #want to see if file exists and create if not
+        try:
+            with open(self.game_save_file, "x", encoding="utf-8") as file:
+                file.write("Hello, World!")
+            print("File created successfully.")
+        except FileExistsError:
+            print("File already exists. No action taken")
+
+        #open file and try to set highscore with except high score to 0
+        with open(self.game_save_file, 'r') as f:
+            try:
+                self.highscore = int(f.read())
+                print("high score set")
+            except:
+                self.highscore = 0
+                print ("high score is 0")
+            
 
     def new(self):
         self.load_data('level1.txt')
         self.all_sprites = pg.sprite.Group()
         self.all_walls = pg.sprite.Group()
+        self.all_mobs = pg.sprite.Group()
+        self.all_coins = pg.sprite.Group()
         #instantiate player here
 
         # self.player = Player(self, 0, 0)
@@ -54,6 +77,10 @@ class Game:
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     Wall(self, col, row)
+                if tile == 'M':
+                    Mob(self, col, row)
+                if tile == 'C':
+                    Coin(self, col, row)
         for row, tiles in enumerate(self.map.data):
                     for col, tile in enumerate(tiles):
                         if tile == 'P':
@@ -70,9 +97,11 @@ class Game:
             self.update() #this updates the gate
             self.draw() #this draws sprites
 
-    def events(self):
+    def events(self): 
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                # with open(path.join(self.game_dir, self.game_save_file), 'w') as f:
+                #         f.write
                 if self.playing:
                     self.playing = False
                 self.running = False
@@ -90,10 +119,12 @@ class Game:
         text_rect.midtop = (x,y)
         self.screen.blit(text_surface, text_rect)
 
+
     def draw(self):
         self.screen.fill(BLUE)
         self.all_sprites.draw(self.screen)
         self.draw_text("Frames per second: " + str(floor(1/self.dt) ), 24, WHITE, WIDTH/2, HEIGHT/4)
+        self.draw_text(f"Coins: {self.player.coins}" , 24, WHITE, WIDTH/2, HEIGHT/8)
         pg.display.flip()
 
 if __name__ == "__main__":
