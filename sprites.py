@@ -122,6 +122,8 @@ class Player(Sprite):
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
             self.coins += 1
+            self.game.score += 1
+            
     
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.all_walls, 'x')
@@ -196,6 +198,9 @@ class Mob(Sprite):
         if collide_with_walls(self, self.game.all_walls, 'x'):
                 print("x collide")
                 self.speed *= -1
+
+
+
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.all_walls, 'y')
         self.pos += self.vel * self.speed * self.game.dt
