@@ -40,6 +40,9 @@ class Game:
         self.img_dir = path.join(self.game_dir, 'images')
         self.snd_dir = path.join(self.game_dir, 'sounds')
         self.map = Map(path.join(self.game_dir, map))
+         ################# sound handling ####################
+        self.snd_dir = path.join(self.game_dir, 'sounds')
+        self.pickup_snd = pg.mixer.Sound(path.join(self.snd_dir, "coin_pickup.mp3"))
 
         #want to see if file exists and create if not
         try:
@@ -68,12 +71,7 @@ class Game:
         self.all_coins = pg.sprite.Group()
         #instantiate player here
 
-        # self.player = Player(self, 0, 0)
-        # self.wall = Wall(self, 5, 0)
-        # self.wall = Wall(self, 10, 0)
-        # self.wall = Wall(self, 5, 10)
-        # self.wall = Wall(self, 5, 2)
-        # self.wall = Wall(self, 5, 15)
+
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -87,6 +85,8 @@ class Game:
                         if tile == 'P':
                             
                             self.player = Player(self, col, row)
+        pg.mixer.music.load(path.join(self.snd_dir, "background_music.ogg"))
+        pg.mixer.music.play(loops=-1)
         
        
 

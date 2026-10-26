@@ -123,7 +123,8 @@ class Player(Sprite):
         if hits:
             self.coins += 1
             self.game.score += 1
-            
+            self.game.pickup_snd.play()
+
     
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.all_walls, 'x')
