@@ -21,6 +21,7 @@ from settings import *
 from sprites import *
 from utils import *
 
+
 class Game:
     def __init__(self):
         pg.init()
@@ -64,12 +65,14 @@ class Game:
             
 
     def new(self):
+    #instantiate sprite classes here
         self.load_data('level1.txt')
         self.all_sprites = pg.sprite.Group()
         self.all_walls = pg.sprite.Group()
         self.all_mobs = pg.sprite.Group()
         self.all_coins = pg.sprite.Group()
-        #instantiate player here
+        self.all_particles = pg.sprite.Group()
+        
 
 
         for row, tiles in enumerate(self.map.data):

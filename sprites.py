@@ -3,7 +3,7 @@ from pygame.sprite import Sprite
 from settings import *
 from os import path
 from utils import *
-
+from random import randint
 vec = pg.math.Vector2
 
 #create player class with Sprite as super Class
@@ -49,7 +49,10 @@ class Player(Sprite):
         # self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.hit_rect = PLAYER_HIT_RECT
+        #player motion attributes
+    
         self.vel = vec (0,0)
+        self.acc = vec(0,0)
         self.pos = vec(x, y) * TILESIZE
         #start with current frames and last update at zero so we can cycle through animations
         self.current_frame = 0
@@ -65,24 +68,26 @@ class Player(Sprite):
 
 #gets player input
     def get_keys(self):
-        self.vel = vec(0, 0)
+        # self.vel = vec(0, 0)
         keys = pg.key.get_pressed()
 
         if keys[pg.K_a] or keys[pg.K_LEFT]:
             # self.vx = -PLAYER_SPEED
-            self.vel.x = -PLAYER_SPEED
+            # self.vel.x = -PLAYER_SPEED
+            self.acc.x = -5
 
         if keys[pg.K_d] or keys[pg.K_RIGHT]:
-            self.vx = PLAYER_SPEED
-            self.vel.x = PLAYER_SPEED
-
+            # self.vx = PLAYER_SPEED
+            # self.vel.x = PLAYER_SPEED
+            self.acc.x = 5
         if keys[pg.K_w] or keys[pg.K_UP]:
             # self.vy = -PLAYER_SPEED
-            self.vel.y = -PLAYER_SPEED
-
+            # self.vel.y = -PLAYER_SPEED
+            self.acc.y = -5
         if keys[pg.K_s] or keys[pg.K_DOWN]:
             # self.vy= PLAYER_SPEED
-            self.vel.y= PLAYER_SPEED
+            # self.vel.y= PLAYER_SPEED
+            self.acc.y = 5
         #check to see if player is moving diagonally
         if self.vel.x != 0 and self.vel.y != 0:
             self.vel *= 0.7071
@@ -115,15 +120,27 @@ class Player(Sprite):
                 self.rect.bottom = bottom
 
     def update(self):
+        self.acc = vec(0,0)
         self.get_keys()
+        self.acc.x += self.vel.x * PLAYER_FRIC
+        self.acc.y += self.vel.y * PLAYER_FRIC
+        self.vel += self.acc
+        
+       
         self.animate()
+
         self.rect.center = self.pos
-        self.pos += self.vel * self.game.dt
+        self.pos += self.vel + 0.5 * self.acc
+        # self.pos += self.vel * self.game.dt
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
             self.coins += 1
             self.game.score += 1
             self.game.pickup_snd.play()
+            for i in range (100):
+                Particle(self.game, hits[0].rect.x, hits[0].rect.y)
+                hits[0].kill()
+            print(str(len(self.game.all_particles)))
 
     
         self.hit_rect.centerx = self.pos.x
@@ -208,6 +225,40 @@ class Mob(Sprite):
         self.rect.center = self.pos
 
         self.rect.center = self.hit_rect.center
+
+
+class Particle(Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.all_particles
+        Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.vel = vec(randint(-180,180), randint(-180,180))
+        self.pos = vec(x, y)
+        self.rect.center = self.pos
+        self.speed = 5
+        self.countdown = Cooldown()
+        self.countdown.event_time = floor(pg.time.get_ticks() / 1000)
+        print("I created a particle")
+        print(self.rect.x)
+        print(self.rect.y)
+
+
+    def update(self):
+        self.countdown.ticking
+        self.pos += self.vel * self.speed * self.game.dt
+        # self.rect.x += self.speed * randint(-5, 5)
+        # self.rect.y += self.speed * randint(-5, 5)
+        if self.countdown.delta > 1:
+            self.kill()
+            print(str(len(self.game.all_particles)))
+        self.rect.x = self.pos.x
+        self.rect.y = self.pos.y
+
+
+    
 class Wall(Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.all_walls
