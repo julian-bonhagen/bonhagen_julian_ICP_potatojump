@@ -122,6 +122,17 @@ class Player(Sprite):
     def update(self):
         self.acc = vec(0,0)
         self.get_keys()
+        tile_hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
+                if tile_hits:
+                    if tile_hits[0].variant == "ice":
+                        self.cofric = -0.001
+
+                    self.game.score += 1
+                    self.game.pickup_snd.play()
+                    for i in range (100):
+                        Particle(self.game, hits[0].rect.x, hits[0].rect.y)
+                        hits[0].kill()
+                    print(str(len(self.game.all_particles)))
         self.acc.x += self.vel.x * PLAYER_FRIC
         self.acc.y += self.vel.y * PLAYER_FRIC
         self.vel += self.acc
@@ -130,7 +141,7 @@ class Player(Sprite):
         self.animate()
 
         self.rect.center = self.pos
-        self.pos += self.vel + 0.5 * self.acc
+        self.pos += self.vel + self.game.dt + 0.5 * self.acc
         # self.pos += self.vel * self.game.dt
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:

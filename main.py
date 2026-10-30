@@ -83,6 +83,8 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'C':
                     Coin(self, col, row)
+                if tile == 'I'
+                    FlootTile(self, )
         for row, tiles in enumerate(self.map.data):
                     for col, tile in enumerate(tiles):
                         if tile == 'P':
