@@ -61,6 +61,7 @@ class Player(Sprite):
         self.coins = 0
         self.jumping = False
         self.moving = False
+        self.cofric = -0.1
         self.load_images()
         
         print("player instance created")
@@ -74,23 +75,23 @@ class Player(Sprite):
         if keys[pg.K_a] or keys[pg.K_LEFT]:
             # self.vx = -PLAYER_SPEED
             # self.vel.x = -PLAYER_SPEED
-            self.acc.x = -5
+            self.acc.x = -PLAYER_ACC
 
         if keys[pg.K_d] or keys[pg.K_RIGHT]:
             # self.vx = PLAYER_SPEED
             # self.vel.x = PLAYER_SPEED
-            self.acc.x = 5
+            self.acc.x = PLAYER_ACC
         if keys[pg.K_w] or keys[pg.K_UP]:
             # self.vy = -PLAYER_SPEED
             # self.vel.y = -PLAYER_SPEED
-            self.acc.y = -5
+            self.acc.y = -PLAYER_ACC
         if keys[pg.K_s] or keys[pg.K_DOWN]:
             # self.vy= PLAYER_SPEED
             # self.vel.y= PLAYER_SPEED
-            self.acc.y = 5
+            self.acc.y = PLAYER_ACC
         #check to see if player is moving diagonally
-        if self.vel.x != 0 and self.vel.y != 0:
-            self.vel *= 0.7071
+        # if self.vel.x != 0 and self.vel.y != 0:
+        #     self.vel *= 0.7071
        
 
     def jump(self):
@@ -120,28 +121,41 @@ class Player(Sprite):
                 self.rect.bottom = bottom
 
     def update(self):
+        self.animate()
         self.acc = vec(0,0)
         self.get_keys()
+        self.acc.x += self.vel.x * self.cofric
+        self.acc.y += self.vel.y * self.cofric
+        self.vel += self.acc
+        max_fall_speed = TILESIZE / max(self.game.dt, 0)
+    
+        self.vel.y = min(self.vel.y, max_fall_speed)
+        if abs(self.vel.x) < 0.1:
+            self.vel.x = 0
+        if abs(self.vel.y) < 0.1:
+            self.vel.y = 0
+        self.pos += self.vel * self.game.dt + 0.5 * self.acc * (self.game.dt ** 2)
         tile_hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
-                if tile_hits:
-                    if tile_hits[0].variant == "ice":
-                        self.cofric = -0.001
+        if tile_hits:
+            if tile_hits[0].variant == "ice":
+                self.cofric = -0.001
+            else:
+                self.cofric = -.01
 
-                    self.game.score += 1
-                    self.game.pickup_snd.play()
-                    for i in range (100):
-                        Particle(self.game, hits[0].rect.x, hits[0].rect.y)
-                        hits[0].kill()
-                    print(str(len(self.game.all_particles)))
+
+        print(self.vel)
+
+        
+        print(str(len(self.game.all_particles)))
         self.acc.x += self.vel.x * PLAYER_FRIC
         self.acc.y += self.vel.y * PLAYER_FRIC
         self.vel += self.acc
         
        
-        self.animate()
+        
 
         self.rect.center = self.pos
-        self.pos += self.vel + self.game.dt + 0.5 * self.acc
+        # self.pos += self.vel + self.game.dt + 0.5 * self.acc
         # self.pos += self.vel * self.game.dt
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
