@@ -232,7 +232,12 @@ class Mob(Sprite):
                     self.rect = self.image.get_rect()
                     self.rect.bottom = bottom
 
-
+    def follow(self, obj):
+        # make the player follow the given object
+        direction = vec(obj.rect.centerx - self.rect.centerx, obj.rect.centery - self.rect.centery)
+        if direction.length() > 0:
+            direction = direction.normalize()
+        self.vel = direction
 
     def update(self):
         self.animate()
