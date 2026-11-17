@@ -5,6 +5,7 @@ from os import path
 from utils import *
 from random import randint
 vec = pg.math.Vector2
+from math import *
 
 #create player class with Sprite as super Class
 
@@ -89,10 +90,23 @@ class Player(Sprite):
             # self.vy= PLAYER_SPEED
             # self.vel.y= PLAYER_SPEED
             self.acc.y = PLAYER_ACC
+        if keys [pg.K_SPACE]:
+            self.pew()
         #check to see if player is moving diagonally
         # if self.vel.x != 0 and self.vel.y != 0:
         #     self.vel *= 0.7071
-       
+    def pew(self):
+        mpos = pg.mouse.get_pos()
+        print(mpos)
+        targetx = mpos[0]
+        targety = mpos[1]
+        dx = targetx - self.rect.center.x
+        dy = targety - self.rect.center.y
+        angle = atan2(dy, dx)
+        speed_x = 10 * cos(angle)
+        speed_y = 10 * sin(angle)
+        angle = atan2(dy, dx)
+        PewPew(self.game, self.rect.centerx, self.rect.centery, TILESIZE/8, TILESIZE/8, speed_x, speed_y)
 
     def jump(self):
         pass
@@ -179,7 +193,27 @@ class Player(Sprite):
 
 # class Wall(Sprite):
 #     def __init__(self, game, x, y):
-        
+class PewPew(Sprite):
+    def __init__(self, game, x, y, w, h, sx, sy):
+        self.groups = game.all_sprites, game.all_pews
+        Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((w, h))
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.radius = TILESIZE / 8
+        pg.draw.circle(self.image, YELLOW, self.rect.center, self.radius)
+        self.rect.x = x
+        self.rect.y = y
+        self.speed_x = sx
+        self.speed_y = sy
+        self.fired = False
+
+    def update(self):
+        self.rect.x += self.speed_x 
+        self.rect.y += self.speed_y 
+        if self.rect.y < 0 or self.rect.y > HEIGHT:
+            self.kill()
 class Mob(Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.all_mobs
@@ -238,10 +272,11 @@ class Mob(Sprite):
         if direction.length() > 0:
             direction = direction.normalize()
         self.vel = direction
+        
 
     def update(self):
         self.animate()
-        
+        self.follow(self.game.player)
         self.hit_rect.centerx = self.pos.x
         if collide_with_walls(self, self.game.all_walls, 'x'):
                 print("x collide")

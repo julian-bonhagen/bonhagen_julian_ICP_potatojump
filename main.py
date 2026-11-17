@@ -72,6 +72,7 @@ class Game:
         self.all_mobs = pg.sprite.Group()
         self.all_coins = pg.sprite.Group()
         self.all_particles = pg.sprite.Group()
+        self.all_pews = pg.sprite.Group()
         
 
 
